@@ -10,7 +10,7 @@ Without your own client...
 var rnClient = new RecNETClient();
 ```
 
-...or with your own client!
+…or with your own client!
 ```cs
 HttpClient httpClient = new()
 
@@ -19,7 +19,7 @@ var rnClient = new RecNETClient(httpClient)
 
 ### Logging in
 
-Using your exisitng `RecNETClient`, call the asyncronous method `LogInToRecNetAsync()` and pass through your username and password. There is also an optional `testToken` option (defaults to true) in the function that will make an extra HTTP Request to check if the returned token is valid or not.
+Using your exisitng `RecNETClient`, call the asynchronous method `LogInToRecNetAsync()` and pass through your username and password. There is also an optional `testToken` option (defaults to true) in the function that will make an extra HTTP Request to check if the returned token is valid or not.
 
 Example log in:
 ```cs
