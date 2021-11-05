@@ -32,7 +32,7 @@ Console.Write("Password: ");
 string password = Console.ReadLine(); 
 
 var rnClient = new RecNETClient();
-var loginAttempt = await RecNETClient.LogInToRecNetAsync(username, password, true);
+var loginAttempt = await rnClient.LogInToRecNetAsync(username, password, true);
 
 if (!loginAttempt.Success) 
     Console.WriteLine($"Error: {loginAttempt.Error}");
