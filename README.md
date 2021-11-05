@@ -21,7 +21,7 @@ var rnClient = new RecNETClient(httpClient)
 
 Using your exisitng `RecNETClient`, call the asyncronous method `LogInToRecNetAsync()` and pass through your username and password. There is also an optional `testToken` option (defaults to true) in the function that will make an extra HTTP Request to check if the returned token is valid or not.
 
-Example log in
+Example log in:
 ```cs
 Console.WriteLine("Please enter your username and password below.");
 
