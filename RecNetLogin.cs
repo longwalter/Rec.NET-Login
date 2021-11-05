@@ -18,7 +18,7 @@ namespace RecNetCredentialLogin
 
         private static HttpClient Client { get; set; }
 
-        public static async Task<LogInReturnValue> LogInToRecNetAsync(string username, 
+        public async Task<LogInReturnValue> LogInToRecNetAsync(string username, 
             string password, 
             bool testToken = true,
             CancellationToken cancellationToken = default)
