@@ -8,9 +8,9 @@ namespace Example
     {
         static async Task Main(string[] args)
         {
-            string username = null; // Your username.
-            string password = null; // Your passowrd.
-            string twoFactorCode = null; // Your 2FA code if enabled.
+            string username = "Coach"; // Your username.
+            string password = "SuperSecretPassword1987"; // Your passowrd.
+            string twoFactorCode = "000000"; // Your 2FA code if enabled.
 
             var rnClient = new RecNETClient();
             

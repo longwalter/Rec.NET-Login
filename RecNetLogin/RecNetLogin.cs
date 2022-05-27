@@ -8,63 +8,73 @@ namespace RecNetLogin
 {
     public class RecNETClient
     {
+        /// <summary>
+        /// Initializes an instance of the RecNetClient using the HttpClient passed through.
+        /// </summary>
+        /// <param name="client"></param>
         public RecNETClient(HttpClient client) => Client = client;     
+
+        /// <summary>
+        /// Initializes an instance of the RecNetClient creating the needed HttpClient.
+        /// </summary>
         public RecNETClient() : this(Http.Client) { }
 
         private HttpClient Client { get; set; }
 
+        /// <summary>
+        /// Uses the provided credentials to log in to https://rec.net/
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="twoFactorCode"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>A Bearer Token with the recnet client type</returns>
+        /// <exception cref="RecNetException"></exception>
         public async Task<string> LoginAsync(
             string username,
             string password,
             string twoFactorCode = null,
             CancellationToken cancellationToken = default)
-        {
-            // Create the request.
+        {        
             Uri verifUri = new("https://auth.rec.net/Account/Login?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Drecnet%26redirect_uri%3Dhttps%253A%252F%252Frec.net%252Fauthenticate%252Fdefault%26response_type%3Did_token%2520token%26scope%3Dopenid%2520rn.api%2520rn.notify%2520rn.match.read%2520rn.chat%2520rn.accounts%2520rn.auth%2520rn.link%2520rn.clubs%2520rn.rooms%26state%3Dc12d4989a6ce472c97f8428cb0778c22%26nonce%3D51ce5569285e423eb5c365940cd7b9cb");
-            var verifTokenRequest = new HttpRequestMessage(HttpMethod.Get, verifUri);
+            
+            HttpRequestMessage verifTokenRequest = new(HttpMethod.Get, verifUri);
+            HttpResponseMessage verifResponse = await Client.SendAsync(verifTokenRequest, cancellationToken);
+            string verifContent = await verifResponse.Content.ReadAsStringAsync(cancellationToken);
 
-            //Obtain unique verifcation token.
-            var verifyRequest = await Client.SendAsync(verifTokenRequest, cancellationToken);
-            string verifContent = await verifyRequest.Content.ReadAsStringAsync(cancellationToken);
-
-            // Only want the verifcation token so just do the easy method.
             string verifToken = verifContent
                 .Split("<input name=\"__RequestVerificationToken\" type=\"hidden\" value=\"")[1]
                 .Split("\" /><input name=\"Input.RememberMe\"")[0];
 
-            // The request data.
             string data = $"Input.Username={username}&Input.Password={password}&Input.RememberMe=true&button=login&__RequestVerificationToken={verifToken}&Input.RememberMe=false";
             using StringContent content = new(data, Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            // Create the request.
-            var postRequest = new HttpRequestMessage(HttpMethod.Post, verifUri)
+            HttpRequestMessage postRequest = new(HttpMethod.Post, verifUri)
             {
                 Content = content
             };
-
-            // Post the request to the server and return the url.
-            var postResponse = await Client.SendAsync(postRequest, cancellationToken);
+            HttpResponseMessage postResponse = await Client.SendAsync(postRequest, cancellationToken);
             string postUrl = postResponse.RequestMessage.RequestUri.ToString();
 
-            string token = null;
+            string token;
 
             if (postUrl.Contains("LoginWith2fa"))
             {
-                var TFApageContent = await postResponse.Content.ReadAsStringAsync(cancellationToken);
+                string TFApageContent = await postResponse.Content.ReadAsStringAsync(cancellationToken);
 
-                var TFAverifCode = TFApageContent
+                string TFAverifCode = TFApageContent
                     .Split("<input name=\"__RequestVerificationToken\" type=\"hidden\" value=\"")[1]
                     .Split("\" /><input name=\"Input.RememberMachine\"")[0];
 
                 string TFArequestData = $"Input.TwoFactorCode={twoFactorCode}&Input.RememberMachine=false&__RequestVerificationToken={TFAverifCode}";
                 using StringContent TFAcontent = new(TFArequestData, Encoding.UTF8, "application/x-www-form-urlencoded");
 
-                var TFArequest = new HttpRequestMessage(HttpMethod.Post, postUrl)
+                HttpRequestMessage TFArequest = new(HttpMethod.Post, postUrl)
                 {
                     Content = TFAcontent
                 };
 
-                var TFAresponse = await Client.SendAsync(TFArequest, cancellationToken);
+                HttpResponseMessage TFAresponse = await Client.SendAsync(TFArequest, cancellationToken);
 
                 string TFAurl = TFAresponse.RequestMessage.RequestUri.ToString();
 
@@ -84,9 +94,7 @@ namespace RecNetLogin
             else
                 token = postUrl.Split("access_token=")[1].Split("&token_type=")[0];
 
-            // Auth is valid so return it.
             return token;
-        }
-        
+        }  
     }
 }
